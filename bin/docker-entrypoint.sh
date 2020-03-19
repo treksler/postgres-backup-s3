@@ -28,7 +28,11 @@ if [ -n "${S3_DEFAULT_REGION}" ]; then
 fi
 
 # set postgres variables, if not set
-export PGDATABASE="${PGDATABASE:-${POSTGRES_DB}}"
+if [[ "${POSTGRES_DB}" =~ [@,\ ]+ ]]; then
+  export PGDATABASE="${POSTGRES_USER:-postgres}"
+else
+  export PGDATABASE="${PGDATABASE:-${POSTGRES_DB}}"
+fi
 export PGHOST="${PGHOST:-${POSTGRES_HOST}}"
 export PGPORT="${PGPORT:-${POSTGRES_PORT}}"
 export PGUSER="${PGUSER:-${POSTGRES_USER}}"
