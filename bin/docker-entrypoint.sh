@@ -28,7 +28,7 @@ if [ -n "${S3_DEFAULT_REGION}" ]; then
 fi
 
 # set postgres variables, if not set
-if [[ "${POSTGRES_DB}" =~ [@,\ ]+ ]]; then
+if echo "${POSTGRES_DB}" | grep -qs "[@,\ ]" ; then
   export PGDATABASE="${POSTGRES_USER:-postgres}"
 else
   export PGDATABASE="${PGDATABASE:-${POSTGRES_DB}}"
