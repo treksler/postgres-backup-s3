@@ -42,7 +42,7 @@ if [ -z "${POSTGRES_DB}" ] ; then
 fi
 
 # perform backup
-for PGDATABASE in ${POSTGRES_DB} ; do 
+for PGDATABASE in ${POSTGRES_DB//,/ } ; do 
   export PGDATABASE
   pg_dump | gzip | aws ${AWS_ARGS} s3 cp - s3://${S3_BUCKET}/${S3_PATH}/${PGDATABASE}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz || exit 2
 done
