@@ -3,19 +3,17 @@
 set -e
 set -o pipefail
 
-if [ -z "${S3_ACCESS_KEY_ID}" ]; then
-  echo "You need to set the S3_ACCESS_KEY_ID environment variable."
-  exit 1
+# read values from file, if available
+if [ -f "${POSTGRES_DB_FILE}" ] ; then
+  export POSTGRES_DB="$(cat ${POSTGRES_DB_FILE})"
 fi
 
-if [ -z "${S3_SECRET_ACCESS_KEY}" ]; then
-  echo "You need to set the S3_SECRET_ACCESS_KEY environment variable."
-  exit 1
+if [ -f "${POSTGRES_USER_FILE}" ] ; then
+  export POSTGRES_USER="$(cat ${POSTGRES_USER_FILE})"
 fi
 
-if [ -z "${S3_BUCKET}" ]; then
-  echo "You need to set the S3_BUCKET environment variable."
-  exit 1
+if [ -f "${POSTGRES_PASSWORD_FILE}" ] ; then
+  export POSTGRES_PASSWORD="$(cat ${POSTGRES_PASSWORD_FILE})"
 fi
 
 if [ -z "${POSTGRES_HOST}" ]; then
@@ -28,8 +26,20 @@ if [ -z "${POSTGRES_USER}" ]; then
   exit 1
 fi
 
+# set postgres variables, if not set
+if echo "${POSTGRES_DB}" | grep -qs "[@,\ ]" ; then
+  export PGDATABASE="${POSTGRES_USER:-postgres}"
+else
+  export PGDATABASE="${PGDATABASE:-${POSTGRES_DB}}"
+fi
+export PGHOST="${PGHOST:-${POSTGRES_HOST}}"
+export PGPORT="${PGPORT:-${POSTGRES_PORT}}"
+export PGUSER="${PGUSER:-${POSTGRES_USER}}"
+export PGPASSWORD="${PGPASSWORD:-${POSTGRES_PASSWORD}}"
+export PGOPTIONS="${PGOPTIONS:-${POSTGRES_OPTIONS}}"
+
 if [ -n "${S3_ENDPOINT}" ]; then
-  AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
+  export AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
 fi
 
 # back up each database, if none were passed
